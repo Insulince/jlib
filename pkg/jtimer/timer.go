@@ -8,17 +8,14 @@
 // the *time.Duration passed into Stop() is populated with the elapsed duration
 // via a named return variable.
 //
-// You can see all of these ideas come together in the Time function.
+// You can see all of these ideas come together in the Time function, which is
+// the intended way to use this package if you goal is to time a function.
 package jtimer
 
 import (
 	"time"
 
 	"github.com/pkg/errors"
-)
-
-var (
-	ErrNilFn = errors.New("fn is nil")
 )
 
 //go:generate counterfeiter -generate
@@ -35,6 +32,10 @@ type (
 
 var (
 	_ Timer = (*timer)(nil)
+)
+
+var (
+	ErrNilFn = errors.New("fn is nil")
 )
 
 // Start creates a new Timer, records when it was started, and returns it.
