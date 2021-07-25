@@ -1,4 +1,4 @@
-// Package timer provides a simple Timer interface and implements it via the
+// Package jtimer provides a simple Timer interface and implements it via the
 // timer struct. The critical idea behind this package is the simple line:
 // 		defer Start().Stop(&dur)
 // This line captures this intended simplicity of this package, a single line to
@@ -9,7 +9,7 @@
 // via a named return variable.
 //
 // You can see all of these ideas come together in the Time function.
-package timer
+package jtimer
 
 import (
 	"time"
@@ -17,6 +17,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+var (
+	ErrNilFn = errors.New("fn is nil")
+)
+
+//go:generate counterfeiter -generate
+//counterfeiter:generate . Timer
 type (
 	Timer interface {
 		Stop(*time.Duration)
@@ -38,6 +44,9 @@ func Start() Timer {
 
 // Stop sets out to the amount of time passed since t.start.
 func (t *timer) Stop(out *time.Duration) {
+	if t == nil || out == nil {
+		return
+	}
 	*out = time.Since(t.start)
 }
 
@@ -49,9 +58,12 @@ func (t *timer) Stop(out *time.Duration) {
 // approach is the same as t he approach taken by the errgroup.Group.Go function
 // which also allows arbitrary code to be ran within a wrapper-like function.
 func Time(fn func() error) (dur time.Duration, _ error) {
+	if fn == nil {
+		return 0, ErrNilFn
+	}
 	defer Start().Stop(&dur)
 	if err := fn(); err != nil {
-		return 0, errors.Wrap(err, "timing function")
+		return 0, errors.Wrap(err, "timing fn")
 	}
 	return dur, nil
 }
