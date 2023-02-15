@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"runtime"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -26,7 +25,7 @@ func Standard() *logrus.Logger {
 	callerPrettyfier := func(f *runtime.Frame) (function string, file string) {
 		return "", fmt.Sprintf(" ./%s:%v", f.File[55:], f.Line)
 	}
-	textFormatter := logrus.TextFormatter{ForceColors: true, ForceQuote: true, FullTimestamp: true, TimestampFormat: time.RFC3339Nano, PadLevelText: true, QuoteEmptyFields: true, CallerPrettyfier: callerPrettyfier}
+	textFormatter := logrus.TextFormatter{ForceColors: true, ForceQuote: true, PadLevelText: true, QuoteEmptyFields: true, CallerPrettyfier: callerPrettyfier}
 	logger.SetFormatter(&textFormatter)
 	return logger
 }
