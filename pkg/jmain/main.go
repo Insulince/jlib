@@ -12,7 +12,7 @@ import (
 
 type RunFn func(ctx context.Context) error
 
-func JMain(ctx context.Context, runFn RunFn) {
+func JMain(ctx context.Context, runFn RunFn) error {
 	defer func(start time.Time) { log.Printf("execution took %v\n", time.Since(start)) }(time.Now())
 
 	done := jsig.Trap()
@@ -21,7 +21,7 @@ func JMain(ctx context.Context, runFn RunFn) {
 
 	if err := Main(ctx, done, runFn); err != nil {
 		program := filepath.Base(os.Args[0])
-		panic(errors.Wrap(err, program))
+		return errors.Wrap(err, program)
 	}
 
 	log.Println("done")
