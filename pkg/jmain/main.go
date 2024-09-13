@@ -1,0 +1,61 @@
+package jmain
+
+import (
+	"context"
+	"github.com/Insulince/jlib/pkg/jsig"
+	"github.com/pkg/errors"
+	"log"
+	"os"
+	"path/filepath"
+	"time"
+)
+
+type RunFn func(ctx context.Context) error
+
+func JMain(ctx context.Context, runFn RunFn) {
+	defer func(start time.Time) { log.Printf("execution took %v\n", time.Since(start)) }(time.Now())
+
+	done := jsig.Trap()
+
+	log.Println("starting...")
+
+	if err := Main(ctx, done, runFn); err != nil {
+		program := filepath.Base(os.Args[0])
+		panic(errors.Wrap(err, program))
+	}
+
+	log.Println("done")
+}
+
+func Main(ctx context.Context, done <-chan struct{}, runFn RunFn) error {
+	select {
+	case <-ctx.Done(): // Context was done.
+		return errors.Wrap(ctx.Err(), "context done")
+	case <-done: // Signal trap indicated we are done.
+		return nil
+	case err, ok := <-run(ctx, runFn): // An error potentially occurred while running.
+		switch {
+		case err != nil: // We received an error.
+			return errors.Wrap(err, "running")
+		case ok: // There is no error and the channel is still open, this is odd behavior.
+			return errors.Errorf("nil error sent through error channel")
+		default: // There is no error and the channel is closed, this indicates that processing is done.
+			return nil
+		}
+	}
+}
+
+func run(ctx context.Context, runFn RunFn) <-chan error {
+	errs := make(chan error)
+
+	go func() {
+		defer close(errs)
+
+		if err := runFn(ctx); err != nil {
+			errs <- err
+			return
+		}
+	}()
+
+	return errs
+}
