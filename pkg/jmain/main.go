@@ -12,7 +12,10 @@ import (
 
 type RunFn func(ctx context.Context) error
 
-func JMain(ctx context.Context, runFn RunFn) error {
+func JMain(runFn RunFn) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	defer func(start time.Time) { log.Printf("execution took %v\n", time.Since(start)) }(time.Now())
 
 	done := jsig.Trap()
