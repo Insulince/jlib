@@ -25,6 +25,8 @@ func JMain(ctx context.Context, runFn RunFn) error {
 	}
 
 	log.Println("done")
+
+	return nil
 }
 
 func Main(ctx context.Context, done <-chan struct{}, runFn RunFn) error {
