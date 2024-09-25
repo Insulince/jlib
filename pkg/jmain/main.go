@@ -9,6 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/Insulince/jlib/pkg/jmust"
 	"github.com/Insulince/jlib/pkg/jsig"
 )
 
@@ -32,6 +33,10 @@ func Main(runFn RunFn) error {
 	log.Println("done")
 
 	return nil
+}
+
+func MustMain(runFn RunFn) {
+	jmust.Must[any](Main, runFn)
 }
 
 func main(ctx context.Context, done <-chan struct{}, runFn RunFn) error {
