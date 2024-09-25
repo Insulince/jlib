@@ -2,17 +2,19 @@ package jmain
 
 import (
 	"context"
-	"github.com/Insulince/jlib/pkg/jsig"
-	"github.com/pkg/errors"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/pkg/errors"
+
+	"github.com/Insulince/jlib/pkg/jsig"
 )
 
 type RunFn func(ctx context.Context) error
 
-func JMain(runFn RunFn) error {
+func Main(runFn RunFn) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -22,7 +24,7 @@ func JMain(runFn RunFn) error {
 
 	log.Println("starting...")
 
-	if err := Main(ctx, done, runFn); err != nil {
+	if err := main(ctx, done, runFn); err != nil {
 		program := filepath.Base(os.Args[0])
 		return errors.Wrap(err, program)
 	}
@@ -32,7 +34,7 @@ func JMain(runFn RunFn) error {
 	return nil
 }
 
-func Main(ctx context.Context, done <-chan struct{}, runFn RunFn) error {
+func main(ctx context.Context, done <-chan struct{}, runFn RunFn) error {
 	select {
 	case <-ctx.Done(): // Context was done.
 		return errors.Wrap(ctx.Err(), "context done")
